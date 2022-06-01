@@ -9,7 +9,7 @@ In the project directory, you can run:
 ### `npm start`
 
 Runs the game in the development mode.\
-Open [http://localhost:3030](http://localhost:3030) to view it in your browser.
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
 
 ### `npm test`
