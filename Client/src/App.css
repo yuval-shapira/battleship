@@ -1,52 +1,148 @@
 :root {
-    --boardSize: 11;
-  }
+  --boardSize: 11;
+  --host-ship-bg-color: #b9daff;
+  --table-bg-color: #ffffff;
+  --table-border-color: #b1b1b1;
+  
+}
 .game-grid {
-    display: grid;
-    /* grid-template: repeat(var(--boardSize), 30px)/repeat(var(--boardSize), 30px); */
-    grid-template-columns: repeat(var(--boardSize), 30px);
-  }
+  display: grid;
+  /* grid-template: repeat(var(--boardSize), 30px)/repeat(var(--boardSize), 30px); */
+  grid-template-columns: repeat(var(--boardSize), 30px);
+}
 
-.cell{
+.cell {
+  display: flex;
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  border: 1px solid var(--table-border-color);
+  background-color: var(--table-bg-color);
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+  align-items: center;
+}
+.placed-ship {
+  background-color: var(--host-ship-bg-color);
+
+}
+.hover-ship {
+  background-color: #8ffa97;
+}
+/* .cell::before {
+    content: "";
+    display: block;
+    width: 10px;
+    height: 10px;
+    background-color: var(--table-bg-color);
+    border: 1px solid var(--table-border-color);
+    transition: background-color 0.2s ease-in-out;
+} */
+.axe {
     width: 30px;
     height: 30px;
     text-align: center;
     text-justify: middle;
-    border: 1px solid #5047f6;
-    background-color: #f6f6f6;
-    cursor: pointer;
-    transition: background-color 0.2s ease-in-out;
+    border: 1px solid var(--table-border-color);
+    background-color: var(--table-bg-color);
 }
-.flex-host-container{
-    display: flex;
-    /* justify-content: center; */
+.flex-host-container {
+  display: flex;
 }
-.legend{
-    margin: 10px;
+.legend {
+  margin: 10px;
 }
-.wholeShip{
-    display: flex;
-    margin-top: 10px;
-
+.wholeShip {
+  display: flex;
+  margin-top: 10px;
+gap: 1px;
 
 }
 .ship-part {
+  width: 10px;
+  height: 10px;
+  text-align: center;
+  text-justify: middle;
+  border: 1px solid #8cabfa;
+  border-radius: 3px;
+  background-color: var(--host-ship-bg-color);
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out; 
+}
+.remove-ship{
+    display: flex;
     width: 10px;
     height: 10px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: 12px;
+    color: #ff0000;
+    border: 1px solid #ff0000;
+    border-radius: 3px;
+    background-color: var(--table-bg-color);
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out; 
+    margin-left: 10px;
+    padding: 0px;
+}
+
+
+/* .cell:hover {
+  background-color: #a447f6;
+} */
+.legend{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 80px;
+}
+.ship-4{
+    width: 60px;
+    height: 15px;
     text-align: center;
     text-justify: middle;
-    border: 1px solid #5047f6; 
+    border: 1px solid #8cabfa;
     border-radius: 3px;
-    background-color: #f6f6f6;
+    background-color: var(--host-ship-bg-color);
     cursor: pointer;
-    /* transition: background-color 0.2s ease-in-out; */
+    transition: background-color 0.2s ease-in-out;  
 }
-.placed-ship{
-    background-color: #5047f6;
+.ship-3{
+    width: 45px;
+    height: 15px;
+    text-align: center;
+    text-justify: middle;
+    border: 1px solid #8cabfa;
+    border-radius: 3px;
+    background-color: var(--host-ship-bg-color);
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;  
 }
-.hover-ship{
-    background-color: #756ef8;
+.ship-2{
+    width: 30px;
+    height: 15px;
+    text-align: center;
+    text-justify: middle;
+    border: 1px solid #8cabfa;
+    border-radius: 3px;
+    background-color: var(--host-ship-bg-color);
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;  
 }
-.cell:hover{
-    background-color: #a447f6;
+.ship-1{
+    width: 15px;
+    height: 15px;
+    text-align: center;
+    text-justify: middle;
+    border: 1px solid #8cabfa;
+    border-radius: 3px;
+    background-color: var(--host-ship-bg-color);
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;  
+}
+.placed{
+    border: 1px solid #fa8c8c;
+    border-radius: 3px;
+    background-color: #ffb9b9;
 }
