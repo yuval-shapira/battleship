@@ -78,6 +78,30 @@ export function suggesmentOption(directions, x, y, shipSize) {
   // console.log(options);
   return options;
 }
+export function toRemoveTag(direction, x, y, shipSize) {
+  const toRemove = {};
+  switch (direction) {
+    case "down":
+      toRemove.x = x;
+      toRemove.y = y;
+      break;
+    case "up":
+      toRemove.x = x;
+      toRemove.y = y - shipSize + 1;
+      break;
+    case "right":
+      toRemove.x = x;
+      toRemove.y = y;
+      break;
+    case "left":
+      toRemove.x = x - shipSize + 1;
+      toRemove.y = y;
+      break;
+      default:
+        break;
+  }
+  return toRemove;
+}
 //return an array of cells that the ship should be placed in
 export function cellsToMark(direction, x, y, shipSize) {
   const cellsToMark = [];
@@ -143,46 +167,49 @@ export function disableCellsAroundShip(ship) {
 export function checkIfNeedToBeDisable(x, y, table) {
   if (
     x > 0 &&
-    (table[x - 1][y]?.shipID !== null || table[x - 1][y]?.axe !== null)
+    (table[x - 1][y]?.shipID !== null)// || table[x - 1][y]?.axe !== null)
+  ){
+    console.log("able[x - 1][y]?.shipID: ", table[x - 1][y]?.shipID);
+    console.log("able[x - 1][y]?.axe: ", table[x - 1][y]?.axe);
+    return true;
+  }
+  if (
+    x > 0 &&
+    y < 10 &&
+    (table[x - 1][y + 1]?.shipID !== null)// || table[x - 1][y + 1]?.axe !== null)
+  )
+    return true;
+  if (
+    y > 0 &&
+    (table[x][y - 1]?.shipID !== null)// || table[x][y - 1]?.axe !== null)
+  )
+    return true;
+  if (
+    x < 10 &&
+    y > 0 &&
+    (table[x + 1][y - 1]?.shipID !== null)// || table[x + 1][y - 1]?.axe !== null)
   )
     return true;
   if (
     x > 0 &&
-    y < 10 &&
-    (table[x - 1][y + 1]?.shipID !== null || table[x - 1][y + 1]?.axe !== null)
-  )
-    return true;
-  if (
     y > 0 &&
-    (table[x][y - 1]?.shipID !== null || table[x][y - 1]?.axe !== null)
-  )
-    return true;
-  if (
-    x < 10 &&
-    y > 0 &&
-    (table[x + 1][y - 1]?.shipID !== null || table[x + 1][y - 1]?.axe !== null)
-  )
-    return true;
-  if (
-    x > 0 &&
-    y > 0 &&
-    (table[x - 1][y - 1]?.shipID !== null || table[x - 1][y - 1]?.axe !== null)
+    (table[x - 1][y - 1]?.shipID !== null)// || table[x - 1][y - 1]?.axe !== null)
   )
     return true;
   if (
     y < 10 &&
-    (table[x][y + 1]?.shipID !== null || table[x][y + 1]?.axe !== null)
+    (table[x][y + 1]?.shipID !== null)// || table[x][y + 1]?.axe !== null)
   )
     return true;
   if (
     x < 10 &&
-    (table[x + 1][y]?.shipID !== null || table[x + 1][y]?.axe !== null)
+    (table[x + 1][y]?.shipID !== null)// || table[x + 1][y]?.axe !== null)
   )
     return true;
   if (
     x < 10 &&
     y < 10 &&
-    (table[x + 1][y + 1]?.shipID !== null || table[x + 1][y + 1]?.axe !== null)
+    (table[x + 1][y + 1]?.shipID !== null)// || table[x + 1][y + 1]?.axe !== null)
   )
     return true;
   return false;

@@ -5,15 +5,15 @@ import {
   disableCellsAroundShip,
   // suggesmentOption,
   checkIfNeedToBeDisable,
+  toRemoveTag,
 } from "../utils/PlaceShips.js";
 
 export default function reducer(state, { type, payload }) {
-  state.table.forEach((row) => {
-    row.forEach((cell) => {
-      cell.toRemove = false;
-    });
-  });
   switch (type) {
+    case "ENTER_NAME":
+      const nameState = { ...state };
+      nameState.player1 = payload.player1;
+      return nameState;
     case "SELECT_SHIP":
       const selectedState = { ...state };
 
@@ -21,11 +21,33 @@ export default function reducer(state, { type, payload }) {
         (ship) => ship.shipID === payload.shipID
       );
 
-      if (selectedState.legend[shipInLegend]?.isPlaced !== null) {
-        return state;
+      if (selectedState.legend[shipInLegend]?.shipLocation.length !== 0) {
+          return state;
       }
-
+      const selectShipX = selectedState.selectedShip.x;
+      const selectShipY = selectedState.selectedShip.y;
+      if(selectedState.selectedShip.x !== null) {
+        selectedState.table[selectShipX][selectShipY].className = "";
+        selectedState.table[selectShipX][selectShipY].cellStatus = "";
+        selectedState.table[selectShipX][selectShipY].disable = false;
+        selectedState.table[selectShipX][selectShipY].shipID = null;
+        selectedState.table[selectShipX][selectShipY].removeShip = false;
+        
+        selectedState.table.forEach((row) => {
+          row.forEach((cell) => {
+            if (!cell?.axe) {
+              //console.log("cell: ", cell);
+              cell.shipID
+              ? (cell.cellStatus = "placed-ship")
+              : (cell.cellStatus = "");
+            }
+          }
+          );
+        }
+        );
+      }
       selectedState.selectedShip.shipID = payload.shipID;
+      selectedState.selectedShip.indexInLegend = shipInLegend;
       selectedState.selectedShip.shipSize = payload.shipSize;
       selectedState.selectedShip.shipNum = payload.shipNum;
       selectedState.selectedShip.x = null;
@@ -35,50 +57,57 @@ export default function reducer(state, { type, payload }) {
 
       return selectedState;
 
-    case "BUTTON_REMOVE_SHIP":
-      const removeState = { ...state };
-
-      // removeState.table.forEach((row) => {
-      //   row.forEach((cell) => {
-      //     cell.toRemove = false;
-      //   });
-      // });
-      removeState.table[payload.x][payload.y].toRemove = true;
-      return removeState;
-
-    case "REMOVE_SHIP":
-      console.log(payload);
-      const removeShipState = { ...state };
-      const shipInLegendRemove = removeShipState.legend.findIndex(
-        (ship) => ship.shipID === payload.shipID
+     case "REMOVE_SHIP":
+    //   console.log(payload);
+       const removeShipState = { ...state };
+       const shipInLegendRemove = removeShipState.legend.findIndex(
+             (ship) => ship.shipID === payload.shipID
+           );
+      const shipToRemove = removeShipState.legend[shipInLegendRemove].shipLocation;
+      shipToRemove.forEach((partLocation) => {
+        removeShipState.table[partLocation.x][partLocation.y].className = "";
+        removeShipState.table[partLocation.x][partLocation.y].cellStatus = "";
+        removeShipState.table[partLocation.x][partLocation.y].disable = false;
+        removeShipState.table[partLocation.x][partLocation.y].shipID = null;
+        removeShipState.table[partLocation.x][partLocation.y].removeShip = false;
+      }
       );
-      removeShipState.legend[shipInLegendRemove].isPlaced = false;
-      removeShipState.legend.forEach((ship) => {
-        if (ship?.shipID === payload.shipID) {
-          ship.isPlaced = null;
-        }
-      });
-      removeShipState.table.forEach((row, i) => {
-        row.forEach((cell, j) => {
-          if (cell.shipID === payload.shipID) {
-            cell.shipID = null;
-            cell.disable = false;
-            cell.toRemove = false;
-            //cell.className = "cell";
+      const removeShipX = removeShipState.selectedShip.x;
+      const removeShipY = removeShipState.selectedShip.y;
+      if(removeShipState.selectedShip.x !== null) {
+        removeShipState.table[removeShipX][removeShipY].className = "";
+        removeShipState.table[removeShipX][removeShipY].cellStatus = "";
+        removeShipState.table[removeShipX][removeShipY].disable = false;
+        removeShipState.table[removeShipX][removeShipY].shipID = null;
+        removeShipState.table[removeShipX][removeShipY].removeShip = false;
+      }
+      removeShipState.table.forEach((row, x) => {
+        row.forEach((cell, y) => {
+          const stayDisabled = checkIfNeedToBeDisable(x, y, removeShipState.table)
+          if(!stayDisabled) {
+            removeShipState.table[x][y].disable = false;
           }
-          //console.log(row);
-          console.log(i, j);
-          //console.log(`payload.x: ${payload.x} payload.y: ${payload.y}`); //debug
-          if (!checkIfNeedToBeDisable(i, j, removeShipState.table))
-            cell.disable = false;
-          //console.log(cell);
-        });
-      });
+          if (!cell?.axe) {
+            //console.log("cell: ", cell);
+            cell.shipID
+            ? (cell.cellStatus = "placed-ship")
+            : (cell.cellStatus = "");
+          }
+        }
+        );
+      }
+      );
+      removeShipState.legend[shipInLegendRemove].isPlaced = null;
+      removeShipState.legend[shipInLegendRemove].shipLocation = [];
 
-      return removeShipState;
+       return removeShipState;
 
     case "FIRST_PLACED":
       const firstState = { ...state };
+      if(firstState.selectedShip.shipID === null) {
+        return state;
+      }
+
       const selectedCell = firstState.table[payload.x][payload.y];
       if (selectedCell.disable === false) {
         selectedCell.shipID = firstState.selectedShip.shipID;
@@ -91,26 +120,37 @@ export default function reducer(state, { type, payload }) {
         } else {
           selectedCell.disable = true;
 
+          //firstState.legend[firstState.selectedShip.indexInLegend].shipLocation = [{x: payload.x, y: payload.y}];
+
           const shipInLegend = firstState.legend.findIndex(
             (ship) => ship.shipID === firstState.selectedShip.shipID
           );
-          firstState.legend[shipInLegend].isPlaced = true;
+          //firstState.legend[shipInLegend].isPlaced = true;
           firstState.legend[shipInLegend].cellStatus = "placed";
+          firstState.legend[shipInLegend].shipLocation = [{x: payload.x, y: payload.y}];
 
           const disableAround = disableCellsAroundShip([{x: payload.x, y: payload.y}]);
           disableAround.forEach((cell) => {
             firstState.table[cell.x][cell.y].disable = true;
           });
+          firstState.table[payload.x][payload.y].removeShip = true;
 
           firstState.selectedShip.shipID = null;
           firstState.selectedShip.shipSize = null;
           firstState.selectedShip.shipNum = null;
+          firstState.selectedShip.shipLocation = null;
+          firstState.selectedShip.indexInLegend = null;
+
         }
       }
       return firstState;
 
     case "FULL_PLACED":
       const fullState = { ...state };
+      if(fullState.selectedShip.shipID === null) {
+        return state;
+      }
+
       const directions = optionalDirections(
         fullState.table,
         fullState.selectedShip.x,
@@ -146,16 +186,29 @@ export default function reducer(state, { type, payload }) {
             fullState.table[cell.x][cell.y].shipID = state.selectedShip.shipID;
             fullState.table[cell.x][cell.y].cellStatus = "placed-ship";
           });
+          //save ship coordinates in legend
+          //console.log("fullState.selectedShip.indexInLegend: ", fullState.selectedShip.indexInLegend);
+          //console.log("shipLocation: ", shipToPlace);
+          fullState.legend[fullState.selectedShip.indexInLegend].shipLocation = shipToPlace;
+          //console.log("shipLocation: ",fullState.legend[fullState.selectedShip.indexInLegend].shipLocation);
+
+          const toRemove = toRemoveTag(
+            choosedDirection,
+            fullState.selectedShip.x,
+            fullState.selectedShip.y,
+            fullState.selectedShip.shipSize
+          );
+          fullState.table[toRemove.x][toRemove.y].removeShip = true;
           const disableAround = disableCellsAroundShip(shipToPlace);
           disableAround.forEach((cell) => {
             fullState.table[cell.x][cell.y].disable = true;
           });
 
           //Mark ship as placed in legend
-          const shipInLegend = fullState.legend.findIndex(
-            (ship) => ship.shipID === fullState.selectedShip.shipID
-          );
-          fullState.legend[shipInLegend].isPlaced = shipToPlace;
+          // const shipInLegend = fullState.legend.findIndex(
+          //   (ship) => ship.shipID === fullState.selectedShip.shipID
+          // );
+          // fullState.legend[shipInLegend].isPlaced = shipToPlace;
           //fullState.legend[shipInLegend].cellStatus = "placed";
 
           fullState.selectedShip.shipID = null;
@@ -163,6 +216,8 @@ export default function reducer(state, { type, payload }) {
           fullState.selectedShip.shipNum = null;
           fullState.selectedShip.x = null;
           fullState.selectedShip.y = null;
+          fullState.selectedShip.shipLocation = null;
+          fullState.selectedShip.indexInLegend = null;
 
           fullState.firstPlaced = false;
 

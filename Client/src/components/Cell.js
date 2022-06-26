@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function Cell({cell, x, y, handleClick,mouseHandler}) {
+export default function Cell({cell, x, y, handleClick, mouseHandler, removeShipHanler}) {
   const className = cell.cellStatus;
   return (
     <div
@@ -11,22 +11,18 @@ export default function Cell({cell, x, y, handleClick,mouseHandler}) {
       onMouseOver={cell.axe ? null : () => mouseHandler("MOUSE_OVER", x, y)}
     >
       {cell?.axe && cell.axe}
-      {/* {cell?.toRemove && (
+      {cell?.removeShip && (
         <div
           className="remove-ship"
           onClick={
             cell.axe
               ? null
-              : () =>
-                  dispatch({
-                    type: "REMOVE_SHIP",
-                    payload: { shipID: cell.shipID, x, y },
-                  })
+              : () => removeShipHanler(cell.shipID, x, y)
           }
         >
           X
         </div>
-      )} */}
+      )}
     </div>
   );
 }

@@ -1,131 +1,70 @@
 import "./App.css";
-import React from "react";
+import React, { useEffect } from "react";
 import reducer from "./store/Reducer";
-import Cell from "./components/Cell";
-//import log from '@ajar/marker';
-import {
-  optionalDirections,
-  //checkChoosedDirection,
-  // cellsToMark,
-  // disableCellsAroundShip,
-  suggesmentOption,
-  //  checkIfNeedToBeDisable,
-} from "./utils/PlaceShips.js";
+import initTableGame from "./utils/InitTableGame";
+//import EnterPlayerName from "./components/EnterPlayerName";
+import GameBoard from "./components/GameBoard";
+import LegendBoard from "./components/LegendBoard";
 
-function initTableGame() {
-  //BOARD
-  const initTableGame = [];
-  for (let i = 0; i < 11; i++) {
-    initTableGame.push([]);
-    for (let j = 0; j < 11; j++) {
-      initTableGame[i].push({
-        className: "",
-        cellStatus: "",
-        disable: false,
-        shipID: null,
-        toRemove: false,
-      });
-    }
+import { optionalDirections, suggesmentOption } from "./utils/PlaceShips.js";
+
+import io from "socket.io-client";
+//const socket = io.connect("http://localhost:3030");
+
+async function buttonHandler(playerName) {
+  try {
+    const url = `http://localhost:3030/api/${playerName}`;
+    const response = await fetch(url);
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    return false;
   }
-  //AXES
-  initTableGame[0][0].cellStatus = "axe";
-  for (let i = 1; i < 11; i++) {
-    initTableGame[0][i].axe = i;
-    initTableGame[0][i].cellStatus = "axe";
-    initTableGame[0][i].disable = true;
-    initTableGame[i][0].axe = (i + 9).toString(36).toUpperCase();
-    initTableGame[i][0].cellStatus = "axe";
-    initTableGame[i][0].disable = true;
-  }
-  const legendArray = [
-    {
-      shipID: "ship-4-1",
-      className: "ship-4",
-      shipSize: 4,
-      shipNum: 1,
-      isPlaced: null,
-    },
-    {
-      shipID: "ship-3-2",
-      className: "ship-3",
-      shipSize: 3,
-      shipNum: 2,
-      isPlaced: null,
-    },
-    {
-      shipID: "ship-3-1",
-      className: "ship-3",
-      shipSize: 3,
-      shipNum: 1,
-      isPlaced: null,
-    },
-    {
-      shipID: "ship-2-3",
-      className: "ship-2",
-      shipSize: 2,
-      shipNum: 3,
-      isPlaced: null,
-    },
-    {
-      shipID: "ship-2-2",
-      className: "ship-2",
-      shipSize: 2,
-      shipNum: 2,
-      isPlaced: null,
-    },
-    {
-      shipID: "ship-2-1",
-      className: "ship-2",
-      shipSize: 2,
-      shipNum: 1,
-      isPlaced: null,
-    },
-    {
-      shipID: "ship-1-4",
-      className: "ship-1",
-      shipSize: 1,
-      shipNum: 4,
-      isPlaced: null,
-    },
-    {
-      shipID: "ship-1-3",
-      className: "ship-1",
-      shipSize: 1,
-      shipNum: 3,
-      isPlaced: null,
-    },
-    {
-      shipID: "ship-1-2",
-      className: "ship-1",
-      shipSize: 1,
-      shipNum: 2,
-      isPlaced: null,
-    },
-    {
-      shipID: "ship-1-1",
-      className: "ship-1",
-      shipSize: 1,
-      shipNum: 1,
-      isPlaced: null,
-    },
-  ];
-  return {
-    legend: legendArray,
-    table: initTableGame,
-    selectedShip: {
-      shipID: null,
-      shipSize: null,
-      shipNum: null,
-      x: null,
-      y: null,
-    },
-    firstPlaced: false,
-  };
 }
 
 export default function App() {
   const [host, dispatch] = React.useReducer(reducer, initTableGame());
   //const [step, setStep] = useState(0)
+  const [name, setName] = React.useState("");
+
+  function handleNameChange(e) {
+    const value = e.target.value;
+    console.log("e.target.value: ", value);
+    setName(value);
+  }
+  function handleFormSubmit(e) {
+    //e.preventDefault();
+    //console.log("e.target.value: ", e);
+    console.log("name: ", name);
+    if (name !== "") {
+      dispatch({
+        type: "ENTER_NAME",
+        payload: {
+          player1: name,
+        },
+      });
+    }
+  }
+  useEffect(() => {
+    const socket = io("ws://localhost:3030");
+    socket.on("connect", () => {
+      console.log("connected", socket.id);
+    });
+    socket.on("server-msg", (message) => {
+      console.log(message);
+    });
+    socket.on("client-msg", (data) => {
+      console.log(data);
+    });
+  }, []);
+
+  function removeShipHanler(shipID, x, y) {
+    dispatch({
+                    type: "REMOVE_SHIP",
+                    payload: { shipID: shipID, x, y },
+                  })
+  }
+  
   function handleClick(x, y) {
     if (x !== 0 && y !== 0) {
       let reducerType = "";
@@ -211,50 +150,52 @@ export default function App() {
       });
     }
   }
+
   return (
     <div className="App">
       <header className="App-header">
         <h1>Welcome to BattleShip</h1>
       </header>
       <main className="flex-game-container">
-        <div className="flex-host-container">
-          {/* !!!!!!! LEGEND !!!!!!!! */}
-          <div className="legend">
-            {host.legend.map((ship) => {
-              const className = ship.isPlaced
-                ? `${ship.className} placed`
-                : ship.className;
-              return (
-                <span
-                  id={ship.shipID}
-                  className={className}
-                  onClick={() =>
-                    selectShipHandler(ship.shipID, ship.shipSize, ship.shipNum)
-                  }
-                ></span>
-              );
-            })}
-          </div>
-          {/* !!!!!!! GAME !!!!!!!! */}
-          <div className="game-grid">
-            {host.table.map((row, x) => (
-              <div className="row" key={x}>
-                {row.map((cell, y) => (
-                  <Cell
-                    key={`${x}${y}`}
-                    cell={cell}
-                    x={x}
-                    y={y}
-                    handleClick={handleClick}
-                    mouseHandler={mouseHandler}
-                  />
-                ))}
-                {/* add class name logic - start with change className to status... */}
-              </div>
-            ))}
-          </div>
-        </div>
-        {}
+        {host.player1 === null ? (
+          // <EnterPlayerName
+          // handleNameChange={handleNameChange}
+          // handleFormSubmit={handleFormSubmit}/>
+          <form onSubmit={() => handleFormSubmit()}>
+            <label>
+              Your Name:
+              <input
+                onChange={(e) => handleNameChange(e)}
+                type="text"
+                name="player1"
+                placeholder="Enter your name"
+              />
+            </label>
+            <input type="submit" value="Submit" />
+            {/* <button onClick={handleFormSubmit}>Submit</button> */}
+          </form>
+        ) : (
+          <>
+            <h2>Player 1: {host.player1}</h2>
+            <div className="flex-host-container">
+              {/* !!!!!!! LEGEND !!!!!!!! */}
+              <LegendBoard
+                legendTable={host.legend}
+                selectShipHandler={selectShipHandler}
+              />
+              {/* !!!!!!! GAME !!!!!!!! */}
+              <GameBoard
+                table={host.table}
+                handleClick={handleClick}
+                mouseHandler={mouseHandler}
+                removeShipHanler={removeShipHanler}
+              />
+            </div>
+            <button onClick={() => buttonHandler()} className="d">
+              Let's Play
+            </button>
+          </>
+        )}
       </main>
     </div>
   );
