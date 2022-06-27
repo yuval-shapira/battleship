@@ -69,7 +69,7 @@ export function checkChoosedDirection(x, y, shipSize, userOption) {
   }
   return choosedDirection;
 }
-
+//return the all the directions that the ship can be placed in
 export function suggesmentOption(directions, x, y, shipSize) {
   let options = [];
   directions.forEach((direction) => {
@@ -78,6 +78,7 @@ export function suggesmentOption(directions, x, y, shipSize) {
   // console.log(options);
   return options;
 }
+//return an object with coordinates of the cell to place the "X" on 
 export function toRemoveTag(direction, x, y, shipSize) {
   const toRemove = {};
   switch (direction) {
@@ -163,16 +164,13 @@ export function disableCellsAroundShip(ship) {
   });
   return disableAroundShip;
 }
-
+//return if specific cell need to be marked as "disabled"
 export function checkIfNeedToBeDisable(x, y, table) {
   if (
     x > 0 &&
     (table[x - 1][y]?.shipID !== null)// || table[x - 1][y]?.axe !== null)
-  ){
-    console.log("able[x - 1][y]?.shipID: ", table[x - 1][y]?.shipID);
-    console.log("able[x - 1][y]?.axe: ", table[x - 1][y]?.axe);
+  )
     return true;
-  }
   if (
     x > 0 &&
     y < 10 &&
@@ -214,7 +212,7 @@ export function checkIfNeedToBeDisable(x, y, table) {
     return true;
   return false;
 }
-
+//INTERNAL HELPER FUNCTION - return if specific direction is valid (no disabled cells on the way)
 function checkForDisabledCells(direction, x, y, shipSize, table) {
   switch (direction) {
     case "down":

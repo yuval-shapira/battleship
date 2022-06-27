@@ -2,7 +2,7 @@ import express from "express";
 import game_router from "./modules/game.router.mjs";
 import http from "http";
 import { Server } from "socket.io";
-import fs from "fs";
+//import fs from "fs";
 
 import cors from "cors";
 import log from "@ajar/marker";
@@ -18,7 +18,7 @@ const httpServer = http.createServer(app);
 const io = new Server(httpServer, {
   cors: {
     origin: "*",
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    methods: "GET,POST",
   },
 });
 

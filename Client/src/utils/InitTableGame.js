@@ -106,5 +106,7 @@ export default function initTableGame() {
       y: null,
     },
     firstPlaced: false,
+    numOfShipsPlaced: 0,
+    gameStarted: false,
   };
 }

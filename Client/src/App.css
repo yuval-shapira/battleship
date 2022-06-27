@@ -7,7 +7,6 @@
 }
 .game-grid {
   display: grid;
-  /* grid-template: repeat(var(--boardSize), 30px)/repeat(var(--boardSize), 30px); */
   grid-template-columns: repeat(var(--boardSize), 30px);
 }
 
@@ -18,7 +17,6 @@
   text-align: center;
   border: 1px solid var(--table-border-color);
   background-color: var(--table-bg-color);
-  /* cursor: pointer; */
   transition: background-color 0.2s ease-in-out;
   align-items: center;
 }
@@ -30,15 +28,7 @@
   background-color: #8ffa97;
   cursor: pointer;
 }
-/* .cell::before {
-    content: "";
-    display: block;
-    width: 10px;
-    height: 10px;
-    background-color: var(--table-bg-color);
-    border: 1px solid var(--table-border-color);
-    transition: background-color 0.2s ease-in-out;
-} */
+
 .axe {
     width: 30px;
     height: 30px;
@@ -67,7 +57,6 @@ gap: 1px;
   border: 1px solid #8cabfa;
   border-radius: 3px;
   background-color: var(--host-ship-bg-color);
-  /* cursor: pointer; */
   transition: background-color 0.2s ease-in-out; 
 }
 .remove-ship{
@@ -87,11 +76,6 @@ gap: 1px;
     margin-left: 10px;
     padding: 0px;
 }
-
-
-/* .cell:hover {
-  background-color: #a447f6;
-} */
 .legend{
     display: flex;
     flex-direction: column;

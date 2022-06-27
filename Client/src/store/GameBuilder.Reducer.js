@@ -8,12 +8,13 @@ import {
   toRemoveTag,
 } from "../utils/PlaceShips.js";
 
-export default function reducer(state, { type, payload }) {
+export default function gameBuilderReducer(state, { type, payload }) {
   switch (type) {
     case "ENTER_NAME":
       const nameState = { ...state };
       nameState.player1 = payload.player1;
       return nameState;
+    
     case "SELECT_SHIP":
       const selectedState = { ...state };
 
@@ -22,29 +23,27 @@ export default function reducer(state, { type, payload }) {
       );
 
       if (selectedState.legend[shipInLegend]?.shipLocation.length !== 0) {
-          return state;
+        return state;
       }
       const selectShipX = selectedState.selectedShip.x;
       const selectShipY = selectedState.selectedShip.y;
-      if(selectedState.selectedShip.x !== null) {
+      if (selectedState.selectedShip.x !== null) {
         selectedState.table[selectShipX][selectShipY].className = "";
         selectedState.table[selectShipX][selectShipY].cellStatus = "";
         selectedState.table[selectShipX][selectShipY].disable = false;
         selectedState.table[selectShipX][selectShipY].shipID = null;
         selectedState.table[selectShipX][selectShipY].removeShip = false;
-        
+
         selectedState.table.forEach((row) => {
           row.forEach((cell) => {
             if (!cell?.axe) {
               //console.log("cell: ", cell);
               cell.shipID
-              ? (cell.cellStatus = "placed-ship")
-              : (cell.cellStatus = "");
+                ? (cell.cellStatus = "placed-ship")
+                : (cell.cellStatus = "");
             }
-          }
-          );
-        }
-        );
+          });
+        });
       }
       selectedState.selectedShip.shipID = payload.shipID;
       selectedState.selectedShip.indexInLegend = shipInLegend;
@@ -57,24 +56,25 @@ export default function reducer(state, { type, payload }) {
 
       return selectedState;
 
-     case "REMOVE_SHIP":
-    //   console.log(payload);
-       const removeShipState = { ...state };
-       const shipInLegendRemove = removeShipState.legend.findIndex(
-             (ship) => ship.shipID === payload.shipID
-           );
+    case "REMOVE_SHIP":
+      //   console.log(payload);
+      const removeShipState = { ...state };
+      const shipInLegendRemove = removeShipState.legend.findIndex(
+        (ship) => ship.shipID === payload.shipID
+      );
       const shipToRemove = removeShipState.legend[shipInLegendRemove].shipLocation;
       shipToRemove.forEach((partLocation) => {
         removeShipState.table[partLocation.x][partLocation.y].className = "";
         removeShipState.table[partLocation.x][partLocation.y].cellStatus = "";
         removeShipState.table[partLocation.x][partLocation.y].disable = false;
         removeShipState.table[partLocation.x][partLocation.y].shipID = null;
-        removeShipState.table[partLocation.x][partLocation.y].removeShip = false;
-      }
-      );
+        removeShipState.table[partLocation.x][
+          partLocation.y
+        ].removeShip = false;
+      });
       const removeShipX = removeShipState.selectedShip.x;
       const removeShipY = removeShipState.selectedShip.y;
-      if(removeShipState.selectedShip.x !== null) {
+      if (removeShipState.selectedShip.x !== null) {
         removeShipState.table[removeShipX][removeShipY].className = "";
         removeShipState.table[removeShipX][removeShipY].cellStatus = "";
         removeShipState.table[removeShipX][removeShipY].disable = false;
@@ -83,28 +83,31 @@ export default function reducer(state, { type, payload }) {
       }
       removeShipState.table.forEach((row, x) => {
         row.forEach((cell, y) => {
-          const stayDisabled = checkIfNeedToBeDisable(x, y, removeShipState.table)
-          if(!stayDisabled) {
+          const stayDisabled = checkIfNeedToBeDisable(
+            x,
+            y,
+            removeShipState.table
+          );
+          if (!stayDisabled) {
             removeShipState.table[x][y].disable = false;
           }
           if (!cell?.axe) {
             //console.log("cell: ", cell);
             cell.shipID
-            ? (cell.cellStatus = "placed-ship")
-            : (cell.cellStatus = "");
+              ? (cell.cellStatus = "placed-ship")
+              : (cell.cellStatus = "");
           }
-        }
-        );
-      }
-      );
+        });
+      });
+      removeShipState.numOfShipsPlaced -= 1;
       removeShipState.legend[shipInLegendRemove].isPlaced = null;
       removeShipState.legend[shipInLegendRemove].shipLocation = [];
 
-       return removeShipState;
+      return removeShipState;
 
     case "FIRST_PLACED":
       const firstState = { ...state };
-      if(firstState.selectedShip.shipID === null) {
+      if (firstState.selectedShip.shipID === null) {
         return state;
       }
 
@@ -127,12 +130,19 @@ export default function reducer(state, { type, payload }) {
           );
           //firstState.legend[shipInLegend].isPlaced = true;
           firstState.legend[shipInLegend].cellStatus = "placed";
-          firstState.legend[shipInLegend].shipLocation = [{x: payload.x, y: payload.y}];
+          firstState.legend[shipInLegend].shipLocation = [
+            { x: payload.x, y: payload.y },
+          ];
 
-          const disableAround = disableCellsAroundShip([{x: payload.x, y: payload.y}]);
+          const disableAround = disableCellsAroundShip([
+            { x: payload.x, y: payload.y },
+          ]);
           disableAround.forEach((cell) => {
             firstState.table[cell.x][cell.y].disable = true;
           });
+
+          firstState.numOfShipsPlaced++;
+
           firstState.table[payload.x][payload.y].removeShip = true;
 
           firstState.selectedShip.shipID = null;
@@ -140,14 +150,13 @@ export default function reducer(state, { type, payload }) {
           firstState.selectedShip.shipNum = null;
           firstState.selectedShip.shipLocation = null;
           firstState.selectedShip.indexInLegend = null;
-
         }
       }
       return firstState;
 
     case "FULL_PLACED":
       const fullState = { ...state };
-      if(fullState.selectedShip.shipID === null) {
+      if (fullState.selectedShip.shipID === null) {
         return state;
       }
 
@@ -155,8 +164,7 @@ export default function reducer(state, { type, payload }) {
         fullState.table,
         fullState.selectedShip.x,
         fullState.selectedShip.y,
-        fullState.selectedShip,
-        fullState.firstPlaced
+        fullState.selectedShip
       );
       if (directions.length !== 0) {
         const choosedDirection = checkChoosedDirection(
@@ -187,10 +195,7 @@ export default function reducer(state, { type, payload }) {
             fullState.table[cell.x][cell.y].cellStatus = "placed-ship";
           });
           //save ship coordinates in legend
-          //console.log("fullState.selectedShip.indexInLegend: ", fullState.selectedShip.indexInLegend);
-          //console.log("shipLocation: ", shipToPlace);
           fullState.legend[fullState.selectedShip.indexInLegend].shipLocation = shipToPlace;
-          //console.log("shipLocation: ",fullState.legend[fullState.selectedShip.indexInLegend].shipLocation);
 
           const toRemove = toRemoveTag(
             choosedDirection,
@@ -203,13 +208,7 @@ export default function reducer(state, { type, payload }) {
           disableAround.forEach((cell) => {
             fullState.table[cell.x][cell.y].disable = true;
           });
-
-          //Mark ship as placed in legend
-          // const shipInLegend = fullState.legend.findIndex(
-          //   (ship) => ship.shipID === fullState.selectedShip.shipID
-          // );
-          // fullState.legend[shipInLegend].isPlaced = shipToPlace;
-          //fullState.legend[shipInLegend].cellStatus = "placed";
+          fullState.numOfShipsPlaced++;
 
           fullState.selectedShip.shipID = null;
           fullState.selectedShip.shipSize = null;
@@ -221,13 +220,9 @@ export default function reducer(state, { type, payload }) {
 
           fullState.firstPlaced = false;
 
-          // fullState.table.forEach((row) => {
-          //   row.forEach((cell) => {
-          //     cell.className = cell.className.replace(" hover-ship", "");
-          //   });
-          //});
         }
       }
+      
       return fullState;
 
     case "MOUSE_OVER":
@@ -252,7 +247,20 @@ export default function reducer(state, { type, payload }) {
         });
       return mouseLeaveState;
 
-    default:
+    case "START_GAME":
+      console.log("start game");
+      
+      const startGameState = { ...state };
+      startGameState.gameStarted = true;
+      startGameState.table.forEach((row) => {
+        row.forEach((cell) => {
+          if(cell.removeShip) 
+            cell.removeShip = false;
+        });
+      });
+      return startGameState;
+
+      default:
       return state;
   }
 }
