@@ -1,6 +1,7 @@
 import "./App.css";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import highLevelReducer from "./store/HighLevelReducer";
+import {initOpponentTableGame, initOpponentLegend} from "./utils/InitTableGame";
 import EnterPlayerName from "./components/EnterPlayerName";
 import GameBuilder from "./components/GameBuilder";
 import PlayGame from "./components/PlayGame";
@@ -8,12 +9,15 @@ import PlayGame from "./components/PlayGame";
 import io from "socket.io-client";
 
 const initHighLevelState = {
-  myName: "",
-  opponentName: "",
   gameState: "ENTER_NAME",
-  table: [],
+  myName: null,
+  opponentName: "Hard Coded Player",
+  myTable: [],
+  myLegend: [],
+  opponentTable: initOpponentTableGame(),
+  opponentLegend: initOpponentLegend(),
   gameOver: false,
-  winner: "",
+  winner: null,
 };
 
 export default function App() {
@@ -29,18 +33,22 @@ export default function App() {
       //case "WAITING_FOR_OPPONENT":
       //  return <WaitingForOpponent highLevelDispatch={highLevelDispatch} />;
       case "PLACE_SHIPS":
-        return <GameBuilder highLevelDispatch={highLevelDispatch} myName={highLevelState.myName}/>;
-            //myName={highLevelState.myName}
-            
+        return (
+          <GameBuilder
+            highLevelDispatch={highLevelDispatch}
+            myName={highLevelState.myName}
+            opponentName={highLevelState.opponentName}
+            opponentTable={highLevelState.opponentTable}
+            opponentLegend={highLevelState.opponentLegend}
+          />
+        );
       case "GAME_STARTED":
         return (
           <PlayGame
-            myName={highLevelState.myName}
-            myTable={highLevelState.table}
+            game={highLevelState}
             highLevelDispatch={highLevelDispatch}
-          />
-        );
-      //case "GAME_OVER":
+          />);
+      // case "GAME_OVER":
       //  return <GameOver highLevelDispatch={highLevelDispatch} />;
       default:
         return <div>Error</div>;
@@ -50,7 +58,7 @@ export default function App() {
   useEffect(() => {
     const socket = io("ws://localhost:3030");
     socket.on("connect", () => {
-      console.log("connected", socket.id);
+         console.log("connected", socket.id);
     });
     socket.on("server-msg", (message) => {
       console.log(message);
@@ -60,6 +68,7 @@ export default function App() {
     });
   }, []);
 
+  
   return (
     <div className="App">
       <header className="App-header">
